@@ -1,5 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api'
 import mongoose from 'mongoose'
+import bcryptjs from 'bcryptjs'
+import User from './User'
 
 const token = '7903613362:AAEFlunRQ57OTaEDm08FTGx2_B1qAZJa0Vo'
 const bot = new TelegramBot(token, {polling: true})
@@ -37,18 +39,25 @@ bot.on('callback_query', (callback)=>{
     const callbackData = callback.data
     if(callbackData === 'signIn'){
         bot.sendMessage(chatId, "Напиши свои логин АИСа")
-        bot.once('message', (msg) =>{
+        bot.once('message', async (msg) =>{
             const login = msg.text
             bot.sendMessage(chatId, "Теперь введи свой пороль АИСа")
-            bot.once('message', (msg) =>{
+            bot.once('message', async (msg) =>{
                 const password = msg.text
-                signAis(login, password)
+                await signAis(login, password)
             })
         })
 
     }
 })
-
-function signAis(login, password){
-    console.log(`Твой логин: ${login}, а пороль: ${password}`)
+async function signAis(login, password){
+    const hashPass = await bcryptjs.hash(password, 10)
+    const newUser = new User({
+        login: login,
+        password: hashPass
+    })
+    try{
+        await newUser.save()
+        console.log('Пользователь сохранен: ', newUser)
+    } catch(error){'Ошибка при сохранении пользователя', error}
 }
