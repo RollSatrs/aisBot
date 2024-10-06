@@ -1,9 +1,9 @@
 import TelegramBot from 'node-telegram-bot-api'
 import mongoose from 'mongoose'
 import {signDB} from './saveUserDB.js'
-import puppeteer from 'puppeteer'
+import {signAis} from './signAis.js'
 
-const aisUrl = 'https://ais.semuniver.kz/login.php'
+
 const token = '7903613362:AAEFlunRQ57OTaEDm08FTGx2_B1qAZJa0Vo'
 const bot = new TelegramBot(token, {polling: true})
 const mongoURI = 'mongodb+srv://Rollan:05060401Gm@cluster0.agmmz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
@@ -39,28 +39,30 @@ bot.on('callback_query', (callback)=>{
     const chatId = callback.message.chat.id
     const callbackData = callback.data
     if(callbackData === 'signIn'){
-        bot.sendMessage(chatId, "Напиши свои логин АИСа")
-        bot.once('message', async (msg) =>{
-            const login = msg.text
-            bot.sendMessage(chatId, "Теперь введи свой пароль АИСа")
-            bot.once('message', async (msg) =>{
-                const password = msg.text
-                try {
-                    await signDB(login, password)
-                    await bot.sendMessage(chatId, 'Я сохранил твой пароль в базу данных')
-                } catch(err){bot.sendMessage(chatId, `Произошла ошибка: ${err}`)}
-                
-            })
-        })
-
+        askForLogin(chatId)
     }
 })
 
-
-
-async function signAis(login, password){
-    const browser = await puppeteer.launch({headless: false})
-    const page = await browser.newPage()
-    await page.goto(aisUrl)
-    await page.type('div.form-group:nth-child(1) > input:nth-child(1)')
+function askForLogin(chatId){
+    bot.sendMessage(chatId, "Напиши свои логин АИСа")
+    bot.once('message', async (msg) =>{
+        const login = msg.text
+        console.log(login.length)
+        if(login.length === 5){
+            bot.sendMessage(chatId, "Теперь введи свой пароль АИСа")
+            bot.once('message', async (msg) =>{
+                const password = msg.text
+                signAis(login, password).then(() =>{bot.sendPhoto(chatId, `./screenShot/${login}.jpg`)})
+                .catch((err) =>{console.log('Ошибка', err)})
+                // try {await signDB(login, password), await bot.sendMessage(chatId, 'Я сохранил твой пароль в базу данных')} 
+                // catch(err){bot.sendMessage(chatId, `Произошла ошибка: ${err}`)}
+            })
+        }else{
+            bot.sendMessage(chatId, 'Логин должен содержать ровно 5 символов.')
+            askForLogin(chatId)
+        }
+    })
 }
+
+
+
