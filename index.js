@@ -1,7 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api'
 import mongoose from 'mongoose'
-import bcryptjs from 'bcryptjs'
-import User from './User.js'
+import {signDB} from './saveUserDB.js'
 import puppeteer from 'puppeteer'
 
 const aisUrl = 'https://ais.semuniver.kz/login.php'
@@ -43,28 +42,21 @@ bot.on('callback_query', (callback)=>{
         bot.sendMessage(chatId, "Напиши свои логин АИСа")
         bot.once('message', async (msg) =>{
             const login = msg.text
-            bot.sendMessage(chatId, "Теперь введи свой пороль АИСа")
+            bot.sendMessage(chatId, "Теперь введи свой пароль АИСа")
             bot.once('message', async (msg) =>{
                 const password = msg.text
-                await signDB(login, password)
+                try {
+                    await signDB(login, password)
+                    await bot.sendMessage(chatId, 'Я сохранил твой пароль в базу данных')
+                } catch(err){bot.sendMessage(chatId, `Произошла ошибка: ${err}`)}
+                
             })
         })
 
     }
 })
 
-async function signDB(login, password){
-    const hashPass = await bcryptjs.hash(password, 10)
-    const newUser = new User({
-        login: login,
-        password: hashPass
-    })
-    try{
-        await newUser.save()
-        
-        console.log('Пользователь сохранен: ', newUser)
-    } catch(error){'Ошибка при сохранении пользователя', error}
-}
+
 
 async function signAis(login, password){
     const browser = await puppeteer.launch({headless: false})
