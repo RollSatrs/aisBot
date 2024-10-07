@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
     },
     password: {
-        type: String,
+        type: Number,
         required: true
     }
 })

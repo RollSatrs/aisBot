@@ -1,8 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api'
 import mongoose from 'mongoose'
 import {signDB} from './saveUserDB.js'
-import {signAis} from './signAis.js'
-
+import {askForLogin} from './askForLogin.js'
 
 const token = '7903613362:AAEFlunRQ57OTaEDm08FTGx2_B1qAZJa0Vo'
 const bot = new TelegramBot(token, {polling: true})
@@ -39,30 +38,6 @@ bot.on('callback_query', (callback)=>{
     const chatId = callback.message.chat.id
     const callbackData = callback.data
     if(callbackData === 'signIn'){
-        askForLogin(chatId)
+        askForLogin(chatId, bot)
     }
 })
-
-function askForLogin(chatId){
-    bot.sendMessage(chatId, "Напиши свои логин АИСа")
-    bot.once('message', async (msg) =>{
-        const login = msg.text
-        console.log(login.length)
-        if(login.length === 5){
-            bot.sendMessage(chatId, "Теперь введи свой пароль АИСа")
-            bot.once('message', async (msg) =>{
-                const password = msg.text
-                signAis(login, password).then(() =>{bot.sendPhoto(chatId, `./screenShot/${login}.jpg`)})
-                .catch((err) =>{console.log('Ошибка', err)})
-                // try {await signDB(login, password), await bot.sendMessage(chatId, 'Я сохранил твой пароль в базу данных')} 
-                // catch(err){bot.sendMessage(chatId, `Произошла ошибка: ${err}`)}
-            })
-        }else{
-            bot.sendMessage(chatId, 'Логин должен содержать ровно 5 символов.')
-            askForLogin(chatId)
-        }
-    })
-}
-
-
-

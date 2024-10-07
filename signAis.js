@@ -1,6 +1,8 @@
 import puppeteer, { Keyboard } from 'puppeteer'
 
 const aisUrl = 'https://ais.semuniver.kz/login.php'
+export let verification 
+
 function delay(ms){
     return new Promise(resolve =>{setTimeout(resolve, ms)})
 }
@@ -15,10 +17,16 @@ function delay(ms){
     await page.type(loginSelector, login)
     await page.type(passwordSelector, password)
     
-    delay(10000)
+    // await delay(10000)
     await page.click(submitButtonSelector)
-    await page.waitForNavigation()
-    await page.screenshot({path: `./screenShot/${login}.jpg`})
-    delay(10000)
-    await browser.close()
+    try {
+        await page.waitForNavigation()
+        await page.waitForSelector('.box-body.box-profile', {timeout: 1000})
+        verification = true
+    } catch (err){verification = false} 
+    finally{
+        delay(1000)
+        await browser.close()
+    }
+    return verification
 }
