@@ -1,7 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api'
 import mongoose from 'mongoose'
-import {signDB} from './saveUserDB.js'
 import {askForLogin} from './askForLogin.js'
+import {options} from './buttons.js'
 
 const token = '7903613362:AAEFlunRQ57OTaEDm08FTGx2_B1qAZJa0Vo'
 const bot = new TelegramBot(token, {polling: true})
@@ -11,18 +11,7 @@ mongoose.connect(mongoURI).then(() => {console.log('Подключение к Mo
 
 bot.onText('/start', (msg) =>{
     const chatId = msg.chat.id
-    const options = {
-        reply_markup:{
-            inline_keyboard:[
-                [
-                    {text: "Войти в АИС", callback_data:"signIn"}
-                ],
-                [
-                    {text: "Как использывать этого бота", callback_data:"help"}
-                ]
-            ]
-        }
-    }
+    
     const welcome = `Добро пожаловать в бот АИС! 🎉
 Я здесь, чтобы помочь тебе с следующими задачами:
     - Вход в систему АИС с использованием твоих учетных данных.
@@ -37,7 +26,5 @@ bot.onText('/start', (msg) =>{
 bot.on('callback_query', (callback)=>{
     const chatId = callback.message.chat.id
     const callbackData = callback.data
-    if(callbackData === 'signIn'){
-        askForLogin(chatId, bot)
-    }
+    if(callbackData === 'signIn'){askForLogin(chatId, bot)}
 })

@@ -7,9 +7,11 @@ export async function signDB(login, password){
         login: login,
         password: hashPass
     })
+    console.log('rerer')
     try{
         await newUser.save() 
+
         console.log('Пользователь сохранен: ', newUser)
-    } catch(error){'Ошибка при сохранении пользователя', error}
+    } catch(error){console.log('Ошибка при сохранении пользователя', error)}
 }
 
