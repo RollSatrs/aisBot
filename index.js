@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 import {askForLogin} from './askForLogin.js'
 import {options} from './buttons.js'
 
-const token = '7903613362:AAEFlunRQ57OTaEDm08FTGx2_B1qAZJa0Vo'
+const token = 'ВВеди токен'
 const bot = new TelegramBot(token, {polling: true})
 const mongoURI = 'mongodb+srv://Rollan:05060401Gm@cluster0.agmmz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 mongoose.connect(mongoURI).then(() => {console.log('Подключение к MongoDB успешно!')})
